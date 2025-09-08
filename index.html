@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Activities</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Applying the Inter font to the whole page */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the draggable items */
+        .draggable {
+            cursor: move;
+            user-select: none;
+            /* Prevents long words from overflowing their container */
+            overflow-wrap: break-word;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px; /* Give a consistent height */
+        }
+        /* Style for when an item is being dragged */
+        .dragging {
+            opacity: 0.5;
+            border: 2px dashed #cbd5e0;
+        }
+        /* Style for the drop zones */
+        .drop-zone {
+            min-height: 60px; /* Match the draggable item height */
+            display: inline-flex; /* Use inline-flex for sentence drop zones */
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.5rem;
+            vertical-align: middle;
+        }
+        /* Correct and incorrect answer styles */
+        .correct {
+            border: 3px solid #4ade80; /* green-400 */
+        }
+        .incorrect {
+            border: 3px solid #f87171; /* red-400 */
+        }
+        /* Correct and incorrect for checkboxes and radio buttons */
+        .label-correct {
+            color: #16a34a; /* green-600 */
+        }
+        .label-incorrect {
+            color: #dc2626; /* red-600 */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-indigo-200 to-blue-200 min-h-screen flex flex-col antialiased">
+
+    <!-- Page 1: Welcome Page -->
+    <div id="welcome-page" class="flex flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-6 text-center">
+            <div class="mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">Welcome!</h1>
+                <p class="text-lg text-gray-600">Let's begin your interactive activity.</p>
+            </div>
+            <div class="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+                <img src="https://johanka2014.github.io/hologram_teachers/image.png" alt="Hologram Teachers Illustration" class="w-full h-auto object-contain rounded-xl shadow-2xl" onerror="this.onerror=null;this.src='https://placehold.co/600x400/a5b4fc/ffffff?text=Image+Not+Found';">
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button class="flex items-center justify-center px-6 py-3 bg-gray-300 text-gray-500 rounded-lg shadow-md cursor-not-allowed" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button id="welcome-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page 2: Matching Game -->
+    <div id="matching-game-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Match the Person</h1>
+                    <p class="text-md text-gray-600 mt-2">Drag each name and drop it onto the correct picture.</p>
+                </div>
+                <div class="flex flex-col gap-8 w-full">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+                        <h2 class="text-xl font-semibold text-center text-gray-700 mb-4">Names</h2>
+                        <div id="names-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                    </div>
+                    <div id="images-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="check-answers-btn" class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105">Check Answers</button>
+                    <button id="reset-game-btn" class="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105 ml-4">Reset Game</button>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="game-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button id="game-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page 3: Definitions Game -->
+    <div id="definitions-game-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Match the Definition</h1>
+                    <p class="text-md text-gray-600 mt-2">Drag the term and drop it onto the correct definition.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+                        <h2 class="text-xl font-semibold text-center text-gray-700 mb-4">Terms</h2>
+                        <div id="terms-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4"></div>
+                    </div>
+                    <div id="definitions-container" class="flex flex-col gap-4"></div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="check-definitions-btn" class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105">Check Answers</button>
+                    <button id="reset-definitions-btn" class="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105 ml-4">Reset Game</button>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="definitions-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button id="definitions-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page 4: Fill in the Blanks Game -->
+    <div id="fill-in-blanks-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Fill in the Blanks</h1>
+                    <p class="text-md text-gray-600 mt-2">Drag the correct word to complete each definition.</p>
+                </div>
+                <div class="flex flex-col gap-8 w-full">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+                        <h2 class="text-xl font-semibold text-center text-gray-700 mb-4">Words</h2>
+                        <div id="words-container" class="grid grid-cols-3 sm:grid-cols-6 gap-4"></div>
+                    </div>
+                    <div id="sentences-container" class="flex flex-col gap-4 text-lg"></div>
+                </div>
+                <div class="mt-8 text-center">
+                    <button id="check-blanks-btn" class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105">Check Answers</button>
+                    <button id="reset-blanks-btn" class="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105 ml-4">Reset Game</button>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="blanks-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button id="blanks-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page 5: Discussion Questions -->
+    <div id="discussion-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Discussion Questions</h1>
+                    <p class="text-md text-gray-600 mt-2">Discuss these questions in pairs.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="flex flex-col gap-6 text-lg">
+                        <p>1. Do you store your photos on the <strong>cloud</strong> or do you keep them on your devices?</p>
+                        <p>2. Who do you think hologram boxes might be <strong>aimed</strong> at? Will regular people be able to buy them?</p>
+                        <p>3. Do you think <strong>touchscreen</strong> phones and tablets have made life better or worse for most people?</p>
+                    </div>
+                    <div>
+                        <img src="https://johanka2014.github.io/hologram_teachers/touchscreen.png" alt="Touchscreen" class="w-full h-auto object-contain rounded-xl shadow-lg">
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="discussion-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button id="discussion-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page 6: Listening Activity -->
+    <div id="listening-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Listening for Specific Information</h1>
+                    <p class="text-md text-gray-600 mt-2">Listen to the podcast. Tick the items you hear mentioned.</p>
+                </div>
+                <div class="flex flex-col items-center gap-6 w-full">
+                    <audio controls class="w-full max-w-md">
+                        <source src="https://johanka2014.github.io/hologram_teachers/hologram_tutors.m4a" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div id="checklist-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-lg w-full max-w-xl">
+                        <!-- Checkboxes will be inserted here -->
+                    </div>
+                </div>
+                 <div class="mt-8 text-center">
+                    <button id="check-listening-btn" class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105">Check Answers</button>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="listening-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                 <button id="listening-next-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <span>Next</span>
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Page 7: Listening Comprehension -->
+    <div id="comprehension-page" style="display: none;" class="flex-col flex-grow">
+        <main class="flex-grow flex flex-col items-center justify-center p-4 md:p-6">
+            <div class="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Listening for Comprehension</h1>
+                    <p class="text-md text-gray-600 mt-2">Listen to the report again. For each question, select the answer that most accurately reflects the information given in the audio.</p>
+                </div>
+                <div class="flex flex-col items-center gap-6 w-full">
+                     <audio controls class="w-full max-w-md">
+                        <source src="https://johanka2014.github.io/hologram_teachers/hologram_tutors.m4a" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div id="quiz-container" class="flex flex-col gap-6 text-lg w-full max-w-2xl">
+                        <!-- Quiz questions will be inserted here -->
+                    </div>
+                </div>
+                 <div class="mt-8 text-center">
+                    <button id="check-comprehension-btn" class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-transform transform hover:scale-105">Check Answers</button>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full p-4 shrink-0">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <button id="comprehension-back-btn" class="flex items-center justify-center px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg shadow-md transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Back</span>
+                </button>
+                <button class="flex items-center justify-center px-6 py-3 bg-gray-300 text-gray-500 rounded-lg shadow-md cursor-not-allowed" disabled>
+                    <span>Finish</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page Elements ---
+            const pages = {
+                welcome: document.getElementById('welcome-page'),
+                matching: document.getElementById('matching-game-page'),
+                definitions: document.getElementById('definitions-game-page'),
+                blanks: document.getElementById('fill-in-blanks-page'),
+                discussion: document.getElementById('discussion-page'),
+                listening: document.getElementById('listening-page'),
+                comprehension: document.getElementById('comprehension-page')
+            };
+
+            // --- Navigation Buttons ---
+            const navButtons = {
+                welcomeNext: document.getElementById('welcome-next-btn'),
+                gameBack: document.getElementById('game-back-btn'),
+                gameNext: document.getElementById('game-next-btn'),
+                definitionsBack: document.getElementById('definitions-back-btn'),
+                definitionsNext: document.getElementById('definitions-next-btn'),
+                blanksBack: document.getElementById('blanks-back-btn'),
+                blanksNext: document.getElementById('blanks-next-btn'),
+                discussionBack: document.getElementById('discussion-back-btn'),
+                discussionNext: document.getElementById('discussion-next-btn'),
+                listeningBack: document.getElementById('listening-back-btn'),
+                listeningNext: document.getElementById('listening-next-btn'),
+                comprehensionBack: document.getElementById('comprehension-back-btn')
+            };
+
+            // --- Page Navigation Logic ---
+            function showPage(pageToShow) {
+                Object.values(pages).forEach(page => page.style.display = 'none');
+                pages[pageToShow].style.display = 'flex';
+            }
+
+            navButtons.welcomeNext.addEventListener('click', () => showPage('matching'));
+            navButtons.gameBack.addEventListener('click', () => showPage('welcome'));
+            navButtons.gameNext.addEventListener('click', () => showPage('definitions'));
+            navButtons.definitionsBack.addEventListener('click', () => showPage('matching'));
+            navButtons.definitionsNext.addEventListener('click', () => showPage('blanks'));
+            navButtons.blanksBack.addEventListener('click', () => showPage('definitions'));
+            navButtons.blanksNext.addEventListener('click', () => showPage('discussion'));
+            navButtons.discussionBack.addEventListener('click', () => showPage('blanks'));
+            navButtons.discussionNext.addEventListener('click', () => showPage('listening'));
+            navButtons.listeningBack.addEventListener('click', () => showPage('discussion'));
+            navButtons.listeningNext.addEventListener('click', () => showPage('comprehension'));
+            navButtons.comprehensionBack.addEventListener('click', () => showPage('listening'));
+            
+            // --- Utility Function ---
+            const shuffle = (array) => {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            };
+
+            // --- Generic Drag and Drop Attachment Function ---
+            function attachDragDropListeners(draggableSelector, dropZoneSelector, containerForSwapped) {
+                const draggables = document.querySelectorAll(draggableSelector);
+                const dropZones = document.querySelectorAll(dropZoneSelector);
+
+                draggables.forEach(draggable => {
+                    draggable.addEventListener('dragstart', (event) => {
+                        draggable.classList.add('dragging');
+                        event.dataTransfer.setData('text/plain', event.target.id);
+                    });
+                    draggable.addEventListener('dragend', () => draggable.classList.remove('dragging'));
+                });
+
+                dropZones.forEach(zone => {
+                    zone.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        zone.classList.add('bg-indigo-200');
+                    });
+                    zone.addEventListener('dragleave', () => zone.classList.remove('bg-indigo-200'));
+                    zone.addEventListener('drop', e => {
+                        e.preventDefault();
+                        zone.classList.remove('bg-indigo-200');
+                        const droppedElementId = e.dataTransfer.getData('text/plain');
+                        const droppedElement = document.getElementById(droppedElementId);
+
+                        if (zone.children.length === 0) {
+                            zone.textContent = '';
+                            zone.appendChild(droppedElement);
+                        } else {
+                            const existingElement = zone.firstElementChild;
+                            containerForSwapped.appendChild(existingElement);
+                            zone.textContent = '';
+                            zone.appendChild(droppedElement);
+                        }
+                    });
+                });
+            }
+
+            // --- Game 1: Match the Person ---
+            (function setupPersonMatchingGame() {
+                const people = [
+                    { id: 'p_einstein', name: 'Albert Einstein', img: 'https://johanka2014.github.io/hologram_teachers/albert.png' },
+                    { id: 'p_kahlo', name: 'Frida Kahlo', img: 'https://johanka2014.github.io/hologram_teachers/frida.png' },
+                    { id: 'p_tolkien', name: 'J. R. R. Tolkien', img: 'https://johanka2014.github.io/hologram_teachers/tolkien.png' },
+                    { id: 'p_monroe', name: 'Marilyn Monroe', img: 'https://johanka2014.github.io/hologram_teachers/marilyn.png' },
+                    { id: 'p_joan', name: 'Joan of Arc', img: 'https://johanka2014.github.io/hologram_teachers/joan.png' },
+                    { id: 'p_shakespeare', name: 'William Shakespeare', img: 'https://johanka2014.github.io/hologram_teachers/william.png' },
+                    { id: 'p_curie', name: 'Maria Skłodowska-Curie', img: 'https://johanka2014.github.io/hologram_teachers/marie.png' },
+                    { id: 'p_mlk', name: 'Martin Luther King Jr.', img: 'https://johanka2014.github.io/hologram_teachers/martin.png' }
+                ];
+                const namesContainer = document.getElementById('names-container');
+                const imagesGrid = document.getElementById('images-grid');
+                function setup() {
+                    namesContainer.innerHTML = '';
+                    imagesGrid.innerHTML = '';
+                    shuffle([...people]).forEach(p => {
+                        namesContainer.innerHTML += `<div id="${p.id}" draggable="true" class="draggable bg-white p-2 rounded-md text-center shadow hover:shadow-lg text-xs sm:text-sm md:text-base person-draggable">${p.name}</div>`;
+                    });
+                    shuffle([...people]).forEach(p => {
+                        imagesGrid.innerHTML += `<div class="flex flex-col items-center"><img src="${p.img}" alt="${p.name}" class="w-full h-auto object-cover rounded-lg shadow-md mb-2"><div data-correct-id="${p.id}" class="drop-zone w-full bg-gray-200 rounded-lg p-2 text-center text-gray-500 transition-colors person-drop-zone">Drop name here</div></div>`;
+                    });
+                    attachDragDropListeners('.person-draggable', '.person-drop-zone', namesContainer);
+                }
+                document.getElementById('check-answers-btn').addEventListener('click', () => {
+                    document.querySelectorAll('.person-drop-zone').forEach(zone => {
+                        zone.classList.remove('correct', 'incorrect');
+                        const droppedEl = zone.querySelector('.draggable');
+                        zone.classList.add(droppedEl && droppedEl.id === zone.dataset.correctId ? 'correct' : 'incorrect');
+                    });
+                });
+                document.getElementById('reset-game-btn').addEventListener('click', setup);
+                setup();
+            })();
+
+            // --- Game 2: Match the Definition ---
+            (function setupDefinitionMatchingGame() {
+                const terms = [
+                    { id: 'd_hologram', term: 'Hologram', definition: 'A three-dimensional image formed by the interference of light beams from a laser or other coherent light source.' },
+                    { id: 'd_ai', term: 'Artificial Intelligence (AI)', definition: 'The theory and development of computer systems able to perform tasks normally requiring human intelligence.' },
+                    { id: 'd_ar', term: 'Augmented Reality (AR)', definition: "A technology that superimposes a computer-generated image on a user's view of the real world." },
+                    { id: 'd_vr', term: 'Virtual Reality (VR)', definition: 'The computer-generated simulation of a three-dimensional image or environment that can be interacted with.' },
+                    { id: 'd_gamification', term: 'Gamification', definition: 'The application of typical elements of game playing to other areas of activity to encourage engagement.' },
+                    { id: 'd_personalised', term: 'Personalised learning', definition: "An educational approach that aims to customize learning for each student's strengths, needs, skills, and interests." },
+                    { id: 'd_blended', term: 'Blended learning', definition: 'An approach to education that combines online educational materials with traditional classroom methods.' },
+                    { id: 'd_flipped', term: 'Flipped classroom', definition: 'An instructional strategy that reverses the traditional learning environment by delivering instructional content online, outside of the classroom.' }
+                ];
+                const termsContainer = document.getElementById('terms-container');
+                const definitionsContainer = document.getElementById('definitions-container');
+                function setup() {
+                    termsContainer.innerHTML = '';
+                    definitionsContainer.innerHTML = '';
+                    shuffle([...terms]).forEach(item => {
+                        termsContainer.innerHTML += `<div id="${item.id}" draggable="true" class="draggable bg-white p-2 rounded-md text-center shadow hover:shadow-lg text-sm md:text-base term-draggable">${item.term}</div>`;
+                    });
+                    shuffle([...terms]).forEach(item => {
+                        definitionsContainer.innerHTML += `<div class="flex items-center gap-4 bg-gray-200 p-2 rounded-lg"><div data-correct-id="${item.id}" class="drop-zone w-1/3 bg-gray-300 rounded-lg p-2 text-center text-gray-600 transition-colors term-drop-zone">Drop term here</div><p class="w-2/3 text-gray-700 text-sm">${item.definition}</p></div>`;
+                    });
+                    attachDragDropListeners('.term-draggable', '.term-drop-zone', termsContainer);
+                }
+                document.getElementById('check-definitions-btn').addEventListener('click', () => {
+                    document.querySelectorAll('.term-drop-zone').forEach(zone => {
+                        zone.classList.remove('correct', 'incorrect');
+                        const droppedEl = zone.querySelector('.draggable');
+                        zone.classList.add(droppedEl && droppedEl.id === zone.dataset.correctId ? 'correct' : 'incorrect');
+                    });
+                });
+                document.getElementById('reset-definitions-btn').addEventListener('click', setup);
+                setup();
+            })();
+
+            // --- Game 3: Fill in the Blanks ---
+            (function setupFillInBlanksGame() {
+                const blanks = [
+                    { id: 'b_practical', word: 'practical', sentence: ['application (n): the', 'use of something, especially a new theory, discovery, etc.'] },
+                    { id: 'b_person', word: 'person', sentence: ['figure (n): a', 'of the type mentioned'] },
+                    { id: 'b_different', word: 'different', sentence: ['version (n): a form of something that is slightly', 'from an earlier form or from other forms of the same thing'] },
+                    { id: 'b_vary', word: 'vary', sentence: ['range (v):', 'between two particular amounts, sizes, etc.'] },
+                    { id: 'b_intended', word: 'intended', sentence: ['aim (v): say or do something that is', 'to influence or affect a particular person or group'] },
+                    { id: 'b_subjects', word: 'subjects', sentence: ['curriculum (n): the', 'that are included in a course of study or taught in a school, college, etc.'] }
+                ];
+                const wordsContainer = document.getElementById('words-container');
+                const sentencesContainer = document.getElementById('sentences-container');
+                function setup() {
+                    wordsContainer.innerHTML = '';
+                    sentencesContainer.innerHTML = '';
+                    shuffle([...blanks]).forEach(item => {
+                        wordsContainer.innerHTML += `<div id="${item.id}" draggable="true" class="draggable bg-white p-2 rounded-md text-center shadow hover:shadow-lg text-sm md:text-base blank-draggable">${item.word}</div>`;
+                    });
+                    blanks.forEach((item, index) => {
+                        sentencesContainer.innerHTML += `<div class="bg-gray-200 p-3 rounded-lg"><span>${index + 1}. ${item.sentence[0]} </span><div data-correct-id="${item.id}" class="drop-zone w-32 bg-gray-300 rounded-md text-center text-gray-600 transition-colors blank-drop-zone"></div><span> ${item.sentence[1]}</span></div>`;
+                    });
+                    attachDragDropListeners('.blank-draggable', '.blank-drop-zone', wordsContainer);
+                }
+                document.getElementById('check-blanks-btn').addEventListener('click', () => {
+                    document.querySelectorAll('.blank-drop-zone').forEach(zone => {
+                        zone.classList.remove('correct', 'incorrect');
+                        const droppedEl = zone.querySelector('.draggable');
+                        zone.classList.add(droppedEl && droppedEl.id === zone.dataset.correctId ? 'correct' : 'incorrect');
+                    });
+                });
+                document.getElementById('reset-blanks-btn').addEventListener('click', setup);
+                setup();
+            })();
+
+            // --- Activity 4: Listening ---
+            (function setupListeningActivity() {
+                const checklistContainer = document.getElementById('checklist-container');
+                const items = [
+                    {id: 'speakers', text: 'speakers', correct: true},
+                    {id: 'teachers', text: 'teachers', correct: false},
+                    {id: 'musicians', text: 'musicians', correct: true},
+                    {id: 'concerts', text: 'concerts', correct: true},
+                    {id: 'lessons', text: 'lessons', correct: true},
+                    {id: 'camera', text: 'camera', correct: true},
+                    {id: 'video', text: 'video', correct: false},
+                    {id: 'patients', text: 'patients', correct: true},
+                ];
+
+                items.forEach(item => {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center gap-2 cursor-pointer';
+                    label.setAttribute('for', `chk-${item.id}`);
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `chk-${item.id}`;
+                    checkbox.dataset.correct = item.correct;
+                    checkbox.className = 'h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500';
+                    
+                    const text = document.createElement('span');
+                    text.textContent = item.text;
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(text);
+                    checklistContainer.appendChild(label);
+                });
+
+                document.getElementById('check-listening-btn').addEventListener('click', () => {
+                    const labels = checklistContainer.querySelectorAll('label');
+                    labels.forEach(label => {
+                        const checkbox = label.querySelector('input');
+                        const isCorrect = checkbox.dataset.correct === 'true';
+                        const isChecked = checkbox.checked;
+                        
+                        label.classList.remove('label-correct', 'label-incorrect');
+
+                        if ((isCorrect && isChecked) || (!isCorrect && !isChecked)) {
+                            label.classList.add('label-correct');
+                        } else {
+                            label.classList.add('label-incorrect');
+                        }
+                    });
+                });
+            })();
+
+            // --- Activity 5: Listening Comprehension ---
+            (function setupListeningComprehensionGame() {
+                const quizContainer = document.getElementById('quiz-container');
+                const questions = [
+                    {
+                        question: "1. Which university has tested hologram lectures?",
+                        options: ["Leicester University", "Los Angeles University", "Loughborough University"],
+                        correctAnswer: "Loughborough University"
+                    },
+                    {
+                        question: "2. Which historical figure is mentioned in the report?",
+                        options: ["Albert Einstein", "Marilyn Monroe", "John Steinbeck"],
+                        correctAnswer: "Albert Einstein"
+                    },
+                    {
+                        question: "3. Where is the company that makes the hologram boxes based?",
+                        options: ["Loughborough", "New York", "Los Angeles"],
+                        correctAnswer: "Los Angeles"
+                    },
+                     {
+                        question: "4. How tall are the hologram boxes?",
+                        options: ["nine inches", "ninety inches", "nine hundred inches"],
+                        correctAnswer: "ninety inches"
+                    },
+                    {
+                        question: "5. How much do the smaller versions of the hologram boxes cost?",
+                        options: ["$9,600", "$60,000", "$6,900"],
+                        correctAnswer: "$6,900"
+                    }
+                ];
+
+                questions.forEach((q, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'p-4 bg-gray-100 rounded-lg';
+                    
+                    const questionText = document.createElement('p');
+                    questionText.className = 'font-semibold mb-3';
+                    questionText.textContent = q.question;
+                    questionDiv.appendChild(questionText);
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'flex flex-col gap-2';
+                    
+                    q.options.forEach(option => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center gap-2 cursor-pointer';
+                        
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = `question-${index}`;
+                        radio.value = option;
+                        radio.className = 'h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500';
+                        
+                        const text = document.createElement('span');
+                        text.textContent = option;
+                        
+                        label.appendChild(radio);
+                        label.appendChild(text);
+                        optionsDiv.appendChild(label);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    quizContainer.appendChild(questionDiv);
+                });
+
+                document.getElementById('check-comprehension-btn').addEventListener('click', () => {
+                    questions.forEach((q, index) => {
+                        const questionDiv = quizContainer.children[index];
+                        const labels = questionDiv.querySelectorAll('label');
+                        
+                        labels.forEach(label => {
+                            const radio = label.querySelector('input');
+                            label.classList.remove('label-correct', 'label-incorrect');
+                            
+                            if (radio.checked) {
+                                if (radio.value === q.correctAnswer) {
+                                    label.classList.add('label-correct');
+                                } else {
+                                    label.classList.add('label-incorrect');
+                                }
+                            } else if (radio.value === q.correctAnswer) {
+                                // Also highlight the correct answer if an incorrect one was chosen
+                                label.classList.add('label-correct');
+                            }
+                        });
+                    });
+                });
+            })();
+        });
+    </script>
+</body>
+</html>
